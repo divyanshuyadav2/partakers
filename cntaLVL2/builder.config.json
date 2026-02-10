@@ -1,0 +1,6 @@
+{
+  "command": "php artisan serve, npm run dev",
+  "serverUrl": "http://127.0.0.1:8000/api/auth/redirect?User_UIN=1500000001&api_key=apiKey",
+  "authenticateProxy": false,
+  "commitMode": "commits"
+}

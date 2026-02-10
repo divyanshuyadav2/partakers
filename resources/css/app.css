@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Import external libraries */
+
+/* Custom styles for Cropper.js to make it circular */
+.cropper-view-box {
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.cropper-face {
+    border-radius: 50%;
+}
+
+/* --- RECOMMENDED IMPROVEMENT --- */
+/* Style the cropper overlay to match the dark theme */
+.cropper-modal {
+    background-color: rgba(
+        10,
+        25,
+        41,
+        0.8
+    ); /* Adjust the RGB values if your background is different */
+}
+
+@layer components {
+    /* Main card style inspired by the Figma design */
+    .figma-card {
+        @apply bg-white/[.05] border border-white/[.10] rounded-2xl shadow-lg;
+    }
+
+    /* Main heading for each card */
+    .figma-card-header {
+        @apply text-lg font-semibold text-slate-200 border-b border-white/[.10] px-6 py-4;
+    }
+
+    /* Form input style from the Figma design (rounded, borderless) */
+    .form-input-figma {
+        @apply block w-full bg-slate-900 border-0 rounded-md py-2.5 px-4 text-slate-300 placeholder-slate-500 transition;
+        @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#021420]; /* Use your actual bg color */
+    }
+    .form-input-figma-disabled {
+        @apply form-input-figma bg-slate-800 text-slate-500 cursor-not-allowed;
+    }
+    .form-select-figma {
+        @apply form-input-figma;
+    }
+    .form-checkbox-figma {
+        @apply h-4 w-4 rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500/50;
+    }
+    .form-radio-figma {
+        @apply h-4 w-4 bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500/50;
+    }
+
+    /* --- CRITICAL FIX --- */
+    /* Primary button style (Renamed from .primary-button to .figma-button-primary) */
+    .figma-button-primary {
+        @apply inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-semibold rounded-xl shadow-sm text-white bg-blue-600 transition-colors;
+        @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500;
+        @apply disabled:opacity-70 disabled:cursor-not-allowed;
+    }
+}
+
+/* Ensure your date input icon is visible in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+}
