@@ -21,6 +21,7 @@ Route::get('/contact/create-by-link/{token}', CreateByLink::class)
 
 // API authenticated routes
 
+    // Organization routes
     Route::get('/select-organization', Select::class)
         ->middleware('organization.selected')
         ->name('organization.select');
@@ -58,7 +59,7 @@ Route::get('/contact/create-by-link/{token}', CreateByLink::class)
     })->name('logout');
 
     // Contact routes with organization context
-    Route::middleware(['organization.context'])->group(function () {
+  
         // ✅ MODIFIED: Added contact.owner middleware
         Route::get('/', ContactsIndex::class)->name('home');
         Route::get('/contacts', ContactsIndex::class)->name('contacts.index');
@@ -117,7 +118,6 @@ Route::get('/contact/create-by-link/{token}', CreateByLink::class)
 
             return response()->download($fullPath, basename($filePath));
         })->name('download.doc');
-    });
 
 
 // Debug routes (development only)
