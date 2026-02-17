@@ -69,7 +69,7 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-slate-800/50 border-b border-slate-700/60 text-xs uppercase text-slate-400">
                                     <tr>
-                                        <th class="px-6 py-3 text-left font-semibold">Category (Parent)</th>
+                                        <th class="px-6 py-3 text-left font-semibold">Parent Note</th>
                                         <th class="px-6 py-3 text-left font-semibold">Note (Comment)</th>
                                         <th class="px-6 py-3 text-right font-semibold">Actions</th>
                                     </tr>
