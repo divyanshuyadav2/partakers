@@ -30,7 +30,7 @@
                 class="inline-flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-gray-200 font-bold p-2 sm:px-4 rounded transition"><i
                     class="bi bi-box-arrow-in-down"></i> <span class="hidden sm:inline">Import</span></button>
 
-            <button wire:click="exportCsv" wire:loading.attr="disabled"
+            <button  wire:click="$dispatch('openExportModal')" wire:loading.attr="disabled"
                 class="inline-flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-gray-200 font-bold p-2 sm:px-4 rounded transition disabled:opacity-50">
                 <span wire:loading.remove wire:target="exportCsv">
                     <i class="bi bi-box-arrow-up"></i>
@@ -1026,4 +1026,5 @@
         @livewire('contacts.tag-manager')
         @livewire('contacts.manage-groups')
         @livewire('contacts.manage-issues')
+        @livewire('contacts.manage-export')
     </div>
