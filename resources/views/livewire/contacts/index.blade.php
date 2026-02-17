@@ -11,9 +11,11 @@
                 <i class="bi bi-diagram-3-fill"></i>
                 <span class="hidden sm:inline">Groups</span>
             </button>
-            <button
+           <button
+                wire:click="$dispatch('openIssueManager')"
                 class="inline-flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-gray-200 font-bold p-2 sm:px-4 rounded transition">
-                <i class="bi bi-card-text"></i> <span class="hidden sm:inline">Issuess</span>
+                <i class="bi bi-card-text"></i>
+                <span class="hidden sm:inline">Notes</span>
             </button>
 
             <button wire:click="$dispatch('openTagManager')"
@@ -1023,5 +1025,5 @@
 
         @livewire('contacts.tag-manager')
         @livewire('contacts.manage-groups')
-
+        @livewire('contacts.manage-issues')
     </div>

@@ -21,5 +21,6 @@ class AdmnCntaNoteComnt extends Model
         'CrOn',
         'MoOn',
         'CrBy',
+        'Orga_UIN',
     ];
 }
