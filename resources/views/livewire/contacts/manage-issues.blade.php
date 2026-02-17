@@ -69,7 +69,7 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-slate-800/50 border-b border-slate-700/60 text-xs uppercase text-slate-400">
                                     <tr>
-                                        <th class="px-6 py-3 text-left font-semibold">Category (Parent)</th>
+                                        <th class="px-6 py-3 text-left font-semibold">Parent Note</th>
                                         <th class="px-6 py-3 text-left font-semibold">Note (Comment)</th>
                                         <th class="px-6 py-3 text-right font-semibold">Actions</th>
                                     </tr>
@@ -174,7 +174,7 @@
                         </label>
                         <select wire:model.live="parent" 
                                 class="w-full bg-slate-900/70 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 py-2.5 px-3 transition">
-                            <option value="new">+ New Category</option>
+                            <option value="new">Add Parent Note</option>
                             @foreach ($this->parents as $p)
                                 <option value="{{ $p }}">{{ $p }}</option>
                             @endforeach
@@ -254,7 +254,7 @@
                 <div class="bg-slate-900/70 px-6 py-4 border-b border-slate-700/60 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                            <i class="bi bi-pencil-square text-purple-400"></i>
+                            <i class="bi bi-pencil-square text-blue-400"></i>
                         </div>
                         <h3 class="text-lg font-bold text-white">Edit Parent Name</h3>
                     </div>
@@ -280,13 +280,13 @@
                         </label>
                         <select wire:model.live="selectedCategory" 
                                 class="w-full bg-slate-900/70 border border-slate-600 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 py-2.5 px-3 transition">
-                            <option value="">-- Select a category --</option>
+                            <option value="">-- Select Parent Note --</option>
                             @foreach ($this->organizationCategories as $cat)
                                 <option value="{{ $cat }}">{{ $cat }}</option>
                             @endforeach
                         </select>
                         <p class="mt-1.5 text-xs text-slate-500">
-                            <i class="bi bi-info-circle"></i> Only categories created by your organization can be renamed
+                            <i class="bi bi-info-circle"></i> Only parents created by your organization can be renamed
                         </p>
                     </div>
 
@@ -342,7 +342,7 @@
                     </button>
                     <button type="submit"
                             @if(!$selectedCategory || !$newCategoryName) disabled @endif
-                            class="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-5 rounded-lg transition-colors min-w-[120px]">
+                            class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-5 rounded-lg transition-colors min-w-[120px]">
                         <span wire:loading.remove wire:target="saveCategory">
                             <i class="bi bi-check-circle"></i> Rename
                         </span>

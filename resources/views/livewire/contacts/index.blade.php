@@ -1026,5 +1026,5 @@
         @livewire('contacts.tag-manager')
         @livewire('contacts.manage-groups')
         @livewire('contacts.manage-issues')
-        @include('contacts.manage-export')
+        
     </div>
