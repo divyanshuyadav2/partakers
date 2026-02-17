@@ -8,11 +8,12 @@
             </div>
         @endif
 
-        @if (session('error'))
+       {{-- @if (session('error'))
             <div class="bg-red-800/50 border border-red-600 text-red-300 px-4 py-3 rounded">
                 {{ session('error') }}
             </div>
-        @endif
+        @endif --}}
+      
 
         <div class="space-y-4">
             @if ($this->userOrganizations->count() > 0)

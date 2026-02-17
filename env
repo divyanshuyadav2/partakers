@@ -3,7 +3,7 @@ APP_ENV=production
 APP_KEY=base64:cjA0OHZ6Z2NvanJ1em9ieWRxNnZjY2x4NmJ1dXBod3c=
 APP_DEBUG=false
 APP_TIMEZONE=UTC
-APP_URL=https://admin.partakedigital.com
+APP_URL=https://job.partakers.in/
 
 API_GLOBAL_KEY=apiKey
 API_AUTH_TIMEOUT=3600  # 1 hour
@@ -28,9 +28,9 @@ LOG_LEVEL=warning
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=u625055691_Admin_Office
-DB_USERNAME=u625055691_Admin_Office
-DB_PASSWORD=Contact@1975
+DB_DATABASE=u975025641_job
+DB_USERNAME=u975025641_job
+DB_PASSWORD=parTakers@2026
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120

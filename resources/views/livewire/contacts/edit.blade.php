@@ -191,27 +191,72 @@
                                 </div>
                             </div>
 
-                            <!-- Quick Templates -->
+                            <!-- Templates -->
                             <div class="flex-[0.65] flex flex-col min-h-0">
                                 <p class="text-xs font-semibold text-slate-300 flex items-center gap-1.5 mb-2">
                                     <i class="bi bi-lightning-charge-fill text-yellow-400 text-xs"></i>
                                     Templates
                                 </p>
-                                <div
-                                    class="flex flex-col flex-1 border border-slate-700/60 rounded-md bg-slate-800/40 overflow-hidden">
-                                    <!-- Tabs -->
-                                    <div
-                                        class="flex gap-0.5 p-1 bg-slate-800/60 border-b border-slate-700/50 overflow-x-auto shrink-0">
-                                        @foreach ($this->getQuickComments() as $category => $comments)
-                                            <button type="button"
-                                                wire:click="$set('activeCommentTab', @js($category))"
-                                                class="px-2.5 py-1 text-xs font-medium rounded-sm transition-colors whitespace-nowrap
-                                                {{ ($activeCommentTab ?? 'PAN') === $category
-                                                    ? 'bg-blue-500/20 text-blue-300'
-                                                    : 'text-slate-400 hover:bg-slate-700/30 hover:text-slate-200' }}">
-                                                {{ $category }}
+                                <div class="flex flex-col flex-1 border border-slate-700/60 rounded-md bg-slate-800/40 overflow-hidden">
+                                    
+                                    <!-- Category Search Select -->
+                                    <div class="p-2 bg-slate-800/60 border-b border-slate-700/50 shrink-0">
+                                        <div class="relative" x-data="{ 
+                                            open: false, 
+                                            search: '', 
+                                            categories: @js(array_keys($this->getQuickComments()->toArray())),
+                                            get filteredCategories() {
+                                                if (!this.search) return this.categories;
+                                                return this.categories.filter(cat => 
+                                                    cat.toLowerCase().includes(this.search.toLowerCase())
+                                                );
+                                            }
+                                        }">
+                                            <!-- Selected Value / Trigger -->
+                                            <button 
+                                                type="button"
+                                                @click="open = !open"
+                                                @click.away="open = false"
+                                                class="w-full px-3 py-1.5 text-xs bg-slate-700/40 border border-slate-600 rounded-md text-slate-200 hover:bg-slate-700/60 transition-colors flex items-center justify-between">
+                                                <span>{{ $activeCommentTab ?? 'PAN' }}</span>
+                                                <i class="bi bi-chevron-down text-[10px]" :class="{ 'rotate-180': open }"></i>
                                             </button>
-                                        @endforeach
+
+                                            <!-- Dropdown -->
+                                            <div 
+                                                x-show="open"
+                                                x-transition
+                                                class="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-lg max-h-64 overflow-hidden flex flex-col">
+                                                
+                                                <!-- Search Input -->
+                                                <div class="p-2 border-b border-slate-700/50">
+                                                    <input 
+                                                        type="text"
+                                                        x-model="search"
+                                                        placeholder="Search categories..."
+                                                        class="w-full px-2 py-1 text-xs bg-slate-900/70 border border-slate-600 rounded text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                                        @click.stop>
+                                                </div>
+
+                                                <!-- Category List -->
+                                                <div class="overflow-y-auto max-h-48">
+                                                    <template x-for="category in filteredCategories" :key="category">
+                                                        <button
+                                                            type="button"
+                                                            @click="$wire.set('activeCommentTab', category); open = false; search = ''"
+                                                            class="w-full px-3 py-1.5 text-xs text-left hover:bg-blue-500/15 transition-colors"
+                                                            :class="@js($activeCommentTab ?? 'PAN') === category ? 'bg-blue-500/20 text-blue-300' : 'text-slate-300'"
+                                                            x-text="category">
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- No Results -->
+                                                    <div x-show="filteredCategories.length === 0" class="px-3 py-2 text-xs text-slate-500 text-center">
+                                                        No categories found
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Comments List -->
