@@ -4,44 +4,82 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiAuthenticated
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Debug: Log what we're checking
+        
         Log::info('ApiAuthenticated Middleware Check', [
-            'url' => $request->url(),
+            'url' => $request->fullUrl(),
             'session_id' => session()->getId(),
-            'api_authenticated' => session('api_authenticated'),
-            'session_has_data' => !empty(session()->all()),
-            'all_session' => session()->all()
+            'authenticated_user_uin' => session('authenticated_user_uin'),
         ]);
 
-        if (!session('api_authenticated')) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'API authentication required',
-                    'error_code' => 'NOT_AUTHENTICATED',
-                    'debug' => [
-                        'session_id' => session()->getId(),
-                        'has_session_data' => !empty(session()->all())
-                    ]
-                ], 401);
+        // Already authenticated → skip API
+        if (session()->has('authenticated_user_uin')) {
+            session(['api_authenticated' => true]);
+            return $next($request);
+        }
+
+        // Get token from URL
+        $token = $request->query('token');
+   
+
+        if (!$token) {
+            return $this->unauthorized($request);
+        }
+
+        try {
+            // Call Partakers API
+            $response = Http::timeout(10)->post(
+                config('services.partakers.user_api'),
+                ['token' => $token]
+            );
+            
+
+            if (!$response->ok()) {
+                return response()->view('errors.sessionexpires', [], 401);
             }
 
-            return response()->view('auth.api-error', [
-                'error_message' => 'API authentication required. Please use the proper authentication URL.',
-                'error_code' => 'NOT_AUTHENTICATED'
-            ], 401);
+            $data = $response->json();
+
+            if (empty($data['data'][0]['User_UIN'])) {
+                return $this->unauthorized($request);
+            }
+
+            // Save session
+            session([
+                'token' => $token,
+                'authenticated_user_uin' => $data['data'][0]['User_UIN'],
+                'user_data' => $data['data'][0],
+                'Regi_Addr' => $data['data'][0]['Regi_Addr'] ?? null,
+                'api_authenticated' => true,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('API Auth Failed', ['error' => $e->getMessage()]);
+            return $this->unauthorized($request);
         }
 
         return $next($request);
+    }
+
+    private function unauthorized(Request $request)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'API authentication required'
+            ], 401);
+        }
+
+        return response()->view('auth.api-error', [
+            'error_message' => 'API authentication required.',
+            'error_code' => 'NOT_AUTHENTICATED'
+        ], 401);
     }
 }

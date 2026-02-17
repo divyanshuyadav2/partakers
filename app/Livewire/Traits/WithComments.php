@@ -17,26 +17,32 @@ trait WithComments
      *
      * @return Collection [Category => Collection<rows>]
      */
-    public function getQuickComments(): Collection
-    {
-        if ($this->quickCommentsCache !== null) {
+           public function getQuickComments(): Collection
+        {
+            if ($this->quickCommentsCache !== null) {
+                return $this->quickCommentsCache;
+            }
+            
+            $orgUIN = session('selected_Orga_UIN');
+          
+            $this->quickCommentsCache = DB::table('admn_cnta_note_comnt')
+                ->select(
+                    'Admn_Cnta_Note_Comnt_UIN',
+                    'Category',
+                    'Comnt_Text'
+                )
+                ->where(function($query) use ($orgUIN) {
+                    $query->whereNull('Orga_UIN') // System generated
+                          ->orWhere('Orga_UIN', $orgUIN); // Organization created
+                })
+                ->where('Stau_UIN', self::STATUS_ACTIVE) // status Active
+                ->orderBy('Category')
+                ->orderBy('Comnt_Text')
+                ->get()
+                ->groupBy('Category');
+        
             return $this->quickCommentsCache;
         }
-
-        $this->quickCommentsCache = DB::table('admn_cnta_note_comnt')
-            ->select(
-                'Admn_Cnta_Note_Comnt_UIN',
-                'Category',
-                'Comnt_Text'
-            )
-            ->where('Stau_UIN', self::STATUS_ACTIVE) // status Active
-            ->orderBy('Category')
-            ->orderBy('Comnt_Text')
-            ->get()
-            ->groupBy('Category');
-
-        return $this->quickCommentsCache;
-    }
 
     /**
      * Get comments for a specific category
