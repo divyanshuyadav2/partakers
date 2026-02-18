@@ -118,6 +118,8 @@ Route::middleware(['api.authenticated'])->group(function () {
 
             return response()->download($fullPath, basename($filePath));
         })->name('download.doc');
+        Route::get('/contacts/export/csv', [App\Http\Controllers\ContactExportController::class, 'exportCsv'])
+        ->name('contacts.export.csv');
     });
 });
 

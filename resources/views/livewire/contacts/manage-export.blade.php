@@ -1,279 +1,127 @@
-<?php
+<div>
+    @if ($showExportModal)
+        <div class="fixed inset-0 z-30 flex items-center justify-center p-4"
+             x-data="{ show: @entangle('showExportModal') }"
+             @keydown.escape.window="show = false">
 
-namespace App\Livewire\Contacts;
+            <!-- Backdrop -->
+            <div wire:click="closeModal"
+                 x-show="show"
+                 x-transition.opacity.duration.300ms
+                 class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
 
-use Livewire\Attributes\On;
-use Livewire\Component;
+            <!-- Modal Window -->
+            <div x-show="show"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="relative z-10 flex flex-col w-full max-w-2xl bg-slate-800 rounded-xl shadow-2xl border border-slate-700/60 overflow-hidden"
+                 style="max-height: 85vh;">
 
-class ManageExport extends Component
-{
-    public bool $showExportModal = false;
+                <!-- Header -->
+                <div class="shrink-0 bg-slate-900/70 backdrop-blur-sm px-6 py-4 border-b border-slate-700/60 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
+                            <i class="bi bi-box-arrow-up text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white tracking-tight">Export Contacts</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Select columns to include in CSV</p>
+                        </div>
+                    </div>
+                    <button wire:click="closeModal"
+                        class="p-2 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
+                </div>
 
-    // All available columns with their labels and default checked state
-    public array $columns = [
-        'name_prefix'     => ['label' => 'Name Prefix',           'checked' => true],
-        'gender'          => ['label' => 'Gender',                'checked' => true],
-        'first_name'      => ['label' => 'First Name',            'checked' => true],
-        'middle_name'     => ['label' => 'Middle Name',           'checked' => false],
-        'last_name'       => ['label' => 'Last Name',             'checked' => true],
-        'birthday'        => ['label' => 'Birthday (DD/MM/YYYY)', 'checked' => false],
-        'self_employed'   => ['label' => 'Self Employed',         'checked' => false],
-        'company_name'    => ['label' => 'Company Name',          'checked' => true],
-        'designation'     => ['label' => 'Designation',           'checked' => true],
-        'phone1_label'    => ['label' => 'Phone 1 Label',         'checked' => true],
-        'phone1_code'     => ['label' => 'Phone 1 Country Code',  'checked' => false],
-        'phone1_number'   => ['label' => 'Phone 1 Number',        'checked' => true],
-        'phone2_label'    => ['label' => 'Phone 2 Label',         'checked' => false],
-        'phone2_code'     => ['label' => 'Phone 2 Country Code',  'checked' => false],
-        'phone2_number'   => ['label' => 'Phone 2 Number',        'checked' => false],
-        'phone3_label'    => ['label' => 'Phone 3 Label',         'checked' => false],
-        'phone3_code'     => ['label' => 'Phone 3 Country Code',  'checked' => false],
-        'phone3_number'   => ['label' => 'Phone 3 Number',        'checked' => false],
-        'email1'          => ['label' => 'Email 1',               'checked' => true],
-        'email2'          => ['label' => 'Email 2',               'checked' => false],
-        'email3'          => ['label' => 'Email 3',               'checked' => false],
-        'primary_address' => ['label' => 'Primary Address',       'checked' => true],
-        'tags'            => ['label' => 'Tags',                  'checked' => true],
-        'website'         => ['label' => 'Website',               'checked' => false],
-        'facebook'        => ['label' => 'Facebook',              'checked' => false],
-        'twitter'         => ['label' => 'Twitter',               'checked' => false],
-        'linkedin'        => ['label' => 'LinkedIn',              'checked' => false],
-        'instagram'       => ['label' => 'Instagram',             'checked' => false],
-        'notes'           => ['label' => 'Notes',                 'checked' => false],
-    ];
+                <!-- Error Message -->
+                @if (session()->has('export_error'))
+                    <div class="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3">
+                        <i class="bi bi-exclamation-circle text-red-400"></i>
+                        <span class="text-red-300 text-sm">{{ session('export_error') }}</span>
+                    </div>
+                @endif
 
-    // ============================================================
-    // OPEN / CLOSE
-    // ============================================================
+                <!-- Select All / Deselect All Bar -->
+                <div class="shrink-0 px-6 py-3 bg-slate-800/80 border-b border-slate-700/40 flex items-center justify-between">
+                    <p class="text-xs text-slate-400">
+                        <span class="font-semibold text-white">{{ $this->getSelectedCount() }}</span>
+                        of
+                        <span class="font-semibold text-white">{{ count($columns) }}</span>
+                        columns selected
+                    </p>
+                    <div class="flex gap-2">
+                        <button wire:click="selectAll"
+                            class="text-xs px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-600/30 rounded-md transition-colors">
+                            <i class="bi bi-check-all"></i> Select All
+                        </button>
+                        <button wire:click="deselectAll"
+                            class="text-xs px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600/50 rounded-md transition-colors">
+                            <i class="bi bi-x"></i> Deselect All
+                        </button>
+                    </div>
+                </div>
 
-    #[On('openExportModal')]
-    public function openModal(): void
-    {
-        $this->showExportModal = true;
-    }
+                <!-- Column Checkboxes -->
+                <div class="flex-1 overflow-y-auto p-6 bg-slate-800/50">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        @foreach ($columns as $key => $col)
+                            <label wire:key="col-{{ $key }}"
+                                class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150
+                                    {{ $col['checked']
+                                        ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/15'
+                                        : 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-700/40' }}">
 
-    public function closeModal(): void
-    {
-        $this->showExportModal = false;
-    }
+                                <input type="checkbox"
+                                    wire:model.live="columns.{{ $key }}.checked"
+                                    class="w-4 h-4 rounded text-blue-500 bg-slate-700 border-slate-600 focus:ring-blue-500 focus:ring-offset-slate-800 cursor-pointer">
 
-    // ============================================================
-    // SELECT / DESELECT ALL
-    // ============================================================
+                                <span class="text-sm font-medium {{ $col['checked'] ? 'text-blue-200' : 'text-slate-300' }}">
+                                    {{ $col['label'] }}
+                                </span>
 
-    public function selectAll(): void
-    {
-        foreach ($this->columns as $key => $col) {
-            $this->columns[$key]['checked'] = true;
-        }
-    }
+                                @if($col['checked'])
+                                    <i class="bi bi-check-circle-fill text-blue-400 text-xs ml-auto"></i>
+                                @endif
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
 
-    public function deselectAll(): void
-    {
-        foreach ($this->columns as $key => $col) {
-            $this->columns[$key]['checked'] = false;
-        }
-    }
+                <!-- Footer -->
+                <div class="shrink-0 bg-slate-900/50 px-6 py-4 border-t border-slate-700/60 flex items-center justify-between gap-3">
+                    <p class="text-xs text-slate-500">
+                        <i class="bi bi-info-circle"></i>
+                        Only selected columns will appear in the exported CSV file.
+                    </p>
+                    <div class="flex gap-3">
+                        <button wire:click="closeModal"
+                            class="bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+                            Cancel
+                        </button>
+                        <button wire:click="exportCsv"
+                            wire:loading.attr="disabled"
+                            @disabled($this->getSelectedCount() === 0)
+                            class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm min-w-[130px]">
+                            <span wire:loading.remove wire:target="exportCsv">
+                                <i class="bi bi-box-arrow-up"></i>
+                                Export CSV
+                                @if($this->getSelectedCount() > 0)
+                                    ({{ $this->getSelectedCount() }})
+                                @endif
+                            </span>
+                            <span wire:loading wire:target="exportCsv" class="flex items-center gap-2">
+                                <i class="bi bi-arrow-repeat animate-spin"></i> Exporting...
+                            </span>
+                        </button>
+                    </div>
+                </div>
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
-
-    public function getSelectedCount(): int
-    {
-        return collect($this->columns)->filter(fn($col) => $col['checked'])->count();
-    }
-
-    private function normalizePhoneTypeForExport(?string $phoneType): string
-    {
-        if (empty($phoneType)) {
-            return 'Mobile';
-        }
-
-        $mapping = [
-            'work'     => 'Work',
-            'home'     => 'Home',
-            'self'     => 'Self',
-            'office'   => 'Work',
-            'business' => 'Work',
-        ];
-
-        return $mapping[strtolower($phoneType)] ?? 'Mobile';
-    }
-
-    // ============================================================
-    // EXPORT - Everything self-contained here
-    // ============================================================
-
-    public function exportCsv()
-    {
-        // Get only checked column keys
-        $selectedColumns = collect($this->columns)
-            ->filter(fn($col) => $col['checked'])
-            ->keys()
-            ->toArray();
-
-        // Validate at least one column selected
-        if (empty($selectedColumns)) {
-            session()->flash('export_error', 'Please select at least one column to export.');
-            return;
-        }
-
-        // Full column label map
-        $allColumnLabels = [
-            'name_prefix'     => 'Name Prefix',
-            'gender'          => 'Gender',
-            'first_name'      => 'First Name',
-            'middle_name'     => 'Middle Name',
-            'last_name'       => 'Last Name',
-            'birthday'        => 'Birthday (DD/MM/YYYY)',
-            'self_employed'   => 'Self Employed',
-            'company_name'    => 'Company Name',
-            'designation'     => 'Designation',
-            'phone1_label'    => 'Phone 1 Label',
-            'phone1_code'     => 'Phone 1 Country Code',
-            'phone1_number'   => 'Phone 1 Number',
-            'phone2_label'    => 'Phone 2 Label',
-            'phone2_code'     => 'Phone 2 Country Code',
-            'phone2_number'   => 'Phone 2 Number',
-            'phone3_label'    => 'Phone 3 Label',
-            'phone3_code'     => 'Phone 3 Country Code',
-            'phone3_number'   => 'Phone 3 Number',
-            'email1'          => 'Email 1',
-            'email2'          => 'Email 2',
-            'email3'          => 'Email 3',
-            'primary_address' => 'Primary Address',
-            'tags'            => 'Tags',
-            'website'         => 'Website',
-            'facebook'        => 'Facebook',
-            'twitter'         => 'Twitter',
-            'linkedin'        => 'LinkedIn',
-            'instagram'       => 'Instagram',
-            'notes'           => 'Notes',
-        ];
-
-        // Get org from session
-        $org = session('selected_Orga_UIN');
-
-        // Fetch contacts directly - self-contained, no dependency on parent component
-        $contacts = \App\Models\Admn_User_Mast::where('Admn_Orga_Mast_UIN', $org)
-            ->where('Is_Actv', 1)
-            ->with([
-                'tags',
-                'prefix',
-                'phones'    => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
-                'emails'    => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
-                'addresses' => fn($q) => $q->where('Is_Prmy', true)
-                                           ->with(['country', 'state', 'district', 'pincode']),
-            ])
-            ->get();
-
-        $filename = 'contacts_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
-
-        $headers = [
-            'Content-type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0',
-        ];
-
-        $callback = function () use ($contacts, $selectedColumns, $allColumnLabels) {
-            $file = fopen('php://output', 'w');
-
-            // Write CSV header row (only selected column labels in order)
-            $headerRow = [];
-            foreach ($selectedColumns as $key) {
-                if (isset($allColumnLabels[$key])) {
-                    $headerRow[] = $allColumnLabels[$key];
-                }
-            }
-            fputcsv($file, $headerRow);
-
-            // Write each contact as a row
-            foreach ($contacts as $contact) {
-                $phones = $contact->phones;
-                $phone1 = $phones->get(0);
-                $phone2 = $phones->get(1);
-                $phone3 = $phones->get(2);
-
-                $emails = $contact->emails;
-                $email1 = $emails->get(0);
-                $email2 = $emails->get(1);
-                $email3 = $emails->get(2);
-
-                // Build primary address string
-                $primaryAddress    = $contact->addresses->first();
-                $fullAddressString = '';
-                if ($primaryAddress) {
-                    $addressParts = [
-                        $primaryAddress->Addr,
-                        $primaryAddress->Loca,
-                        $primaryAddress->Lndm,
-                        optional($primaryAddress->pincode)->Code,
-                        optional($primaryAddress->district)->Name,
-                        optional($primaryAddress->state)->Name,
-                        optional($primaryAddress->country)->Name,
-                    ];
-                    $fullAddressString = implode(', ', array_filter($addressParts));
-                }
-
-                // Full data map for every possible column
-                $allData = [
-                    'name_prefix'     => optional($contact->prefix)->Prfx_Name ?? '',
-                    'gender'          => $contact->Gend ?? '',
-                    'first_name'      => $contact->FaNm ?? '',
-                    'middle_name'     => $contact->MiNm ?? '',
-                    'last_name'       => $contact->LaNm ?? '',
-                    'birthday'        => $contact->Brth_Dt
-                                            ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y')
-                                            : '',
-                    'self_employed'   => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
-                    'company_name'    => $contact->Comp_Name ?? '',
-                    'designation'     => $contact->Comp_Dsig ?? '',
-                    'phone1_label'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
-                    'phone1_code'     => optional($phone1)->Cutr_Code ?? '',
-                    'phone1_number'   => optional($phone1)->Phon_Numb ?? '',
-                    'phone2_label'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
-                    'phone2_code'     => optional($phone2)->Cutr_Code ?? '',
-                    'phone2_number'   => optional($phone2)->Phon_Numb ?? '',
-                    'phone3_label'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
-                    'phone3_code'     => optional($phone3)->Cutr_Code ?? '',
-                    'phone3_number'   => optional($phone3)->Phon_Numb ?? '',
-                    'email1'          => optional($email1)->Emai_Addr ?? '',
-                    'email2'          => optional($email2)->Emai_Addr ?? '',
-                    'email3'          => optional($email3)->Emai_Addr ?? '',
-                    'primary_address' => $fullAddressString,
-                    'tags'            => $contact->tags->pluck('Name')->implode(', '),
-                    'website'         => $contact->Web ?? '',
-                    'facebook'        => $contact->FcBk ?? '',
-                    'twitter'         => $contact->Twtr ?? '',
-                    'linkedin'        => $contact->LnDn ?? '',
-                    'instagram'       => $contact->Intg ?? '',
-                    'notes'           => $contact->Note ?? '',
-                ];
-
-                // Only include selected columns, in selected order
-                $row = [];
-                foreach ($selectedColumns as $key) {
-                    $row[] = $allData[$key] ?? '';
-                }
-
-                fputcsv($file, $row);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    // ============================================================
-    // RENDER
-    // ============================================================
-
-    public function render()
-    {
-        return view('livewire.contacts.manage-export');
-    }
-}
+            </div>
+        </div>
+    @endif
+</div>
