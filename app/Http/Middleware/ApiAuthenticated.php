@@ -27,7 +27,7 @@ class ApiAuthenticated
 
         // Get token from URL
         $token = $request->query('token');
-      // $token ='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0L3BhcnRha2VkaWdpdGFsIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdC9wYXJ0YWtlZGlnaXRhbCIsImlhdCI6MTc3MTM5MTk0MywiYWNjZXNzX3Rva2VuIjoiYWU1NWFlNGIzZTZhMjdjZDc5MzEwNzYxZGJiZDQwIiwiVXNlcl9VSU4iOiIxNzY2MDYxNTcyIn0.NdSWXdfXmaEhf1eeGu0o6Nc0MySjBHdRFhAVVXP8ZBQ';
+       //$token ='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0L3BhcnRha2VkaWdpdGFsIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdC9wYXJ0YWtlZGlnaXRhbCIsImlhdCI6MTc3MTM5MTk0MywiYWNjZXNzX3Rva2VuIjoiYWU1NWFlNGIzZTZhMjdjZDc5MzEwNzYxZGJiZDQwIiwiVXNlcl9VSU4iOiIxNzY2MDYxNTcyIn0.NdSWXdfXmaEhf1eeGu0o6Nc0MySjBHdRFhAVVXP8ZBQ';
 
         if (!$token) {
             return $this->unauthorized($request);

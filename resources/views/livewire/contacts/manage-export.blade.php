@@ -71,7 +71,7 @@
                     
                     {{-- Personal Details Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-person-circle"></i>
                             Personal Details
                         </h3>
@@ -86,7 +86,7 @@
 
                     {{-- Company/Employment Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-purple-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-building"></i>
                             Company & Employment
                         </h3>
@@ -101,12 +101,12 @@
 
                     {{-- Contact Information Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-green-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-telephone"></i>
                             Contact Information
                         </h3>
                         <div class="grid grid-cols-2 gap-3">
-                            @foreach (['phone1_label', 'phone1_code', 'phone1_number', 'phone2_label', 'phone2_code', 'phone2_number', 'phone3_label', 'phone3_code', 'phone3_number', 'email1', 'email2', 'email3'] as $key)
+                            @foreach (['phone1_label', 'phone1_number', 'phone2_label', 'phone2_number', 'phone3_label', 'phone3_number', 'email1', 'email2', 'email3'] as $key)
                                 @if(isset($columns[$key]))
                                     @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
                                 @endif
@@ -116,7 +116,7 @@
 
                     {{-- Address Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-orange-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-geo-alt"></i>
                             Address
                         </h3>
@@ -131,7 +131,7 @@
 
                     {{-- Education & Skills Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-cyan-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-mortarboard"></i>
                             Education & Skills
                         </h3>
@@ -146,7 +146,7 @@
 
                     {{-- Financial Information Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-yellow-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-bank"></i>
                             Financial Information
                         </h3>
@@ -161,7 +161,7 @@
 
                     {{-- Documents Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-pink-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-file-earmark-text"></i>
                             Documents
                         </h3>
@@ -176,7 +176,7 @@
 
                     {{-- Web Presence & Other Section --}}
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-indigo-300 mb-3 flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-green-200 mb-3 flex items-center gap-2">
                             <i class="bi bi-globe"></i>
                             Web Presence & Other
                         </h3>
@@ -205,7 +205,7 @@
                         <button wire:click="exportCsv"
                             wire:loading.attr="disabled"
                             @disabled($this->getSelectedCount() === 0)
-                            class="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm min-w-[130px]">
+                            class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm min-w-[130px]">
                             <span wire:loading.remove wire:target="exportCsv">
                                 <i class="bi bi-box-arrow-up"></i>
                                 Export CSV

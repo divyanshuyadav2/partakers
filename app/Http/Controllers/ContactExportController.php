@@ -17,49 +17,50 @@ use Illuminate\Http\Request;
 class ContactExportController extends Controller
 {
     private array $allColumnLabels = [
-        'name_prefix'     => 'Name Prefix',
-        'gender'          => 'Gender',
-        'first_name'      => 'First Name',
-        'middle_name'     => 'Middle Name',
-        'last_name'       => 'Last Name',
-        'birthday'        => 'Birthday (DD/MM/YYYY)',
-        'self_employed'   => 'Self Employed',
-        'company_name'    => 'Company Name',
-        'designation'     => 'Designation',
-        'phone1_label'    => 'Phone 1 Label',
-        'phone1_code'     => 'Phone 1 Country Code',
-        'phone1_number'   => 'Phone 1 Number',
-        'phone2_label'    => 'Phone 2 Label',
-        'phone2_code'     => 'Phone 2 Country Code',
-        'phone2_number'   => 'Phone 2 Number',
-        'phone3_label'    => 'Phone 3 Label',
-        'phone3_code'     => 'Phone 3 Country Code',
-        'phone3_number'   => 'Phone 3 Number',
-        'email1'          => 'Email 1',
-        'email2'          => 'Email 2',
-        'email3'          => 'Email 3',
-        'address_type'    => 'Address Type',
-        'primary_address' => 'Primary Address',
-        'degree_name'     => 'Degree Name',
-        'degree_year'     => 'Degree Completion Year',
-        'skill_name'      => 'Skill Name',
-        'employment_org'  => 'Present Employment Organization',
-        'employment_desg' => 'Present Employment Designation',
-        'bank_name'       => 'Primary Bank Name',
-        'bank_account'    => 'Primary Bank A/c Number',
-        'bank_acc_type'   => 'Primary A/c Type',
-        'bank_ifsc'       => 'Primary IFSC Code',
-        'document_type'   => 'Primary Document Type',
-        'document_number' => 'Primary Document Number',
-        'tags'            => 'Tags',
-        'groups'          => 'Groups',
-        'website'         => 'Website',
-        'facebook'        => 'Facebook',
-        'twitter'         => 'Twitter',
-        'linkedin'        => 'LinkedIn',
-        'instagram'       => 'Instagram',
-        'notes'           => 'Notes',
-    ];
+    'name_prefix'     => 'Name Prefix',
+    'gender'          => 'Gender',
+    'first_name'      => 'First Name',
+    'middle_name'     => 'Middle Name',
+    'last_name'       => 'Last Name',
+    'birthday'        => 'Birthday (DD/MM/YYYY)',
+    'self_employed'   => 'Self Employed',
+    'company_name'    => 'Company Name',
+    'designation'     => 'Designation',
+    
+    'phone1_label'    => 'Phone 1 Label',
+    'phone1_number'   => 'Phone 1 Number',
+    
+    'phone2_label'    => 'Phone 2 Label',
+    'phone2_number'   => 'Phone 2 Number',
+    
+    'phone3_label'    => 'Phone 3 Label',
+    'phone3_number'   => 'Phone 3 Number',
+    
+    'email1'          => 'Email 1',
+    'email2'          => 'Email 2',
+    'email3'          => 'Email 3',
+    'address_type'    => 'Address Type',
+    'primary_address' => 'Primary Address',
+    'degree_name'     => 'Degree Name',
+    'degree_year'     => 'Degree Completion Year',
+    'skill_name'      => 'Skill Name',
+    'employment_org'  => 'Present Employment Organization',
+    'employment_desg' => 'Present Employment Designation',
+    'bank_name'       => 'Primary Bank Name',
+    'bank_account'    => 'Primary Bank A/c Number',
+    'bank_acc_type'   => 'Primary A/c Type',
+    'bank_ifsc'       => 'Primary IFSC Code',
+    'document_type'   => 'Primary Document Type',
+    'document_number' => 'Primary Document Number',
+    'tags'            => 'Tags',
+    'groups'          => 'Groups',
+    'website'         => 'Website',
+    'facebook'        => 'Facebook',
+    'twitter'         => 'Twitter',
+    'linkedin'        => 'LinkedIn',
+    'instagram'       => 'Instagram',
+    'notes'           => 'Notes',
+   ];
 
     public function exportCsv(Request $request)
     {
@@ -238,51 +239,55 @@ class ContactExportController extends Controller
                 // FULL DATA MAP
                 // ------------------------------------------------
                 $allData = [
-                    'name_prefix'     => optional($contact->prefix)->Prfx_Name ?? '',
-                    'gender'          => $contact->Gend ?? '',
-                    'first_name'      => $contact->FaNm ?? '',
-                    'middle_name'     => $contact->MiNm ?? '',
-                    'last_name'       => $contact->LaNm ?? '',
-                    'birthday'        => $contact->Brth_Dt
-                                            ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y')
-                                            : '',
-                    'self_employed'   => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
-                    'company_name'    => $contact->Comp_Name ?? '',
-                    'designation'     => $contact->Comp_Dsig ?? '',
-                    'phone1_label'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
-                    'phone1_code'     => optional($phone1)->Cutr_Code ?? '',
-                    'phone1_number'   => optional($phone1)->Phon_Numb ?? '',
-                    'phone2_label'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
-                    'phone2_code'     => optional($phone2)->Cutr_Code ?? '',
-                    'phone2_number'   => optional($phone2)->Phon_Numb ?? '',
-                    'phone3_label'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
-                    'phone3_code'     => optional($phone3)->Cutr_Code ?? '',
-                    'phone3_number'   => optional($phone3)->Phon_Numb ?? '',
-                    'email1'          => optional($email1)->Emai_Addr ?? '',
-                    'email2'          => optional($email2)->Emai_Addr ?? '',
-                    'email3'          => optional($email3)->Emai_Addr ?? '',
-                    'address_type'    => $addressType,
-                    'primary_address' => $fullAddressString,
-                    'degree_name'     => $degreeName,
-                    'degree_year'     => $degreeYear,
-                    'skill_name'      => $skillNames,
-                    'employment_org'  => $employmentOrg,
-                    'employment_desg' => $employmentDesg,
-                    'bank_name'       => $bankName,
-                    'bank_account'    => $bankAccount,
-                    'bank_acc_type'   => $bankAccType,
-                    'bank_ifsc'       => $bankIfsc,
-                    'document_type'   => $docType,
-                    'document_number' => $docNumber,
-                    'tags'            => $contact->tags->pluck('Name')->implode(', '),
-                    'groups'          => optional($contact->group)->Name ?? '',
-                    'website'         => $contact->Web  ?? '',
-                    'facebook'        => $contact->FcBk ?? '',
-                    'twitter'         => $contact->Twtr ?? '',
-                    'linkedin'        => $contact->LnDn ?? '',
-                    'instagram'       => $contact->Intg ?? '',
-                    'notes'           => $contact->Note ?? '',
-                ];
+                'name_prefix'     => optional($contact->prefix)->Prfx_Name ?? '',
+                'gender'          => $contact->Gend ?? '',
+                'first_name'      => $contact->FaNm ?? '',
+                'middle_name'     => $contact->MiNm ?? '',
+                'last_name'       => $contact->LaNm ?? '',
+                'birthday'        => $contact->Brth_Dt
+                                        ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y')
+                                        : '',
+                'self_employed'   => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
+                'company_name'    => $contact->Comp_Name ?? '',
+                'designation'     => $contact->Comp_Dsig ?? '',
+                
+                // Phone 1 with WhatsApp/Telegram indicators
+                'phone1_label'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
+                'phone1_number'   => $this->formatPhoneWithApps($phone1),
+                
+                // Phone 2 with WhatsApp/Telegram indicators
+                'phone2_label'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
+                'phone2_number'   => $this->formatPhoneWithApps($phone2),
+                
+                // Phone 3 with WhatsApp/Telegram indicators
+                'phone3_label'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
+                'phone3_number'   => $this->formatPhoneWithApps($phone3),
+                
+                'email1'          => optional($email1)->Emai_Addr ?? '',
+                'email2'          => optional($email2)->Emai_Addr ?? '',
+                'email3'          => optional($email3)->Emai_Addr ?? '',
+                'address_type'    => $addressType,
+                'primary_address' => $fullAddressString,
+                'degree_name'     => $degreeName,
+                'degree_year'     => $degreeYear,
+                'skill_name'      => $skillNames,
+                'employment_org'  => $employmentOrg,
+                'employment_desg' => $employmentDesg,
+                'bank_name'       => $bankName,
+                'bank_account'    => $bankAccount,
+                'bank_acc_type'   => $bankAccType,
+                'bank_ifsc'       => $bankIfsc,
+                'document_type'   => $docType,
+                'document_number' => $docNumber,
+                'tags'            => $contact->tags->pluck('Name')->implode(', '),
+                'groups'          => optional($contact->group)->Name ?? '',
+                'website'         => $contact->Web  ?? '',
+                'facebook'        => $contact->FcBk ?? '',
+                'twitter'         => $contact->Twtr ?? '',
+                'linkedin'        => $contact->LnDn ?? '',
+                'instagram'       => $contact->Intg ?? '',
+                'notes'           => $contact->Note ?? '',
+            ];
 
                 // Build final row with ONLY selected columns in correct order
                 $row = [];
@@ -352,4 +357,29 @@ class ContactExportController extends Controller
 
         return $mapping[strtolower($phoneType)] ?? 'Mobile';
     }
+    /**
+ * Format phone number with WhatsApp/Telegram indicators
+ */
+private function formatPhoneWithApps($phone): string
+{
+    if (!$phone || !$phone->Phon_Numb) {
+        return '';
+    }
+
+    $number = $phone->Phon_Numb;
+    $indicators = [];
+
+    if ($phone->Has_WtAp) {
+        $indicators[] = 'WhatsApp';
+    }
+    if ($phone->Has_Telg) {
+        $indicators[] = 'Telegram';
+    }
+
+    if (!empty($indicators)) {
+        return $number . ' (' . implode(', ', $indicators) . ')';
+    }
+
+    return $number;
+}
 }
