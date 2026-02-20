@@ -57,13 +57,28 @@ class Admn_User_Bank_Mast extends Model
     }
 
     /**
-     * Get the bank name details.
+     * Get the bank name details (alias for backward compatibility).
      */
     public function bankName(): BelongsTo
     {
-        // Links this model's 'Bank_Name_UIN' column
-        // to the 'Bank_UIN' column on the 'Admn_Bank_Name' model.
         return $this->belongsTo(Admn_Bank_Name::class, 'Bank_Name_UIN', 'Bank_UIN');
+    }
+
+    /**
+     * Get the bank name details (used by export controller).
+     * This is an alias of bankName() for convenience.
+     */
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(Admn_Bank_Name::class, 'Bank_Name_UIN', 'Bank_UIN');
+    }
+
+    /**
+     * Get the contact/user who owns this bank account (alias).
+     */
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Admn_User_Mast::class, 'Admn_User_Mast_UIN', 'Admn_User_Mast_UIN');
     }
 
     public function attachments()

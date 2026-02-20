@@ -10,6 +10,8 @@ use App\Models\Admn_Prfx_Name_Mast;
 use App\Models\Admn_Stat_Mast;
 use App\Models\Admn_Tag_Mast;
 use App\Models\Admn_User_Mast;
+use App\Models\Admn_Bank_Mast;
+use App\Models\Admn_Docu_Type_Mast;
 use Illuminate\Http\Request;
 
 class ContactExportController extends Controller
@@ -36,8 +38,21 @@ class ContactExportController extends Controller
         'email1'          => 'Email 1',
         'email2'          => 'Email 2',
         'email3'          => 'Email 3',
+        'address_type'    => 'Address Type',
         'primary_address' => 'Primary Address',
+        'degree_name'     => 'Degree Name',
+        'degree_year'     => 'Degree Completion Year',
+        'skill_name'      => 'Skill Name',
+        'employment_org'  => 'Present Employment Organization',
+        'employment_desg' => 'Present Employment Designation',
+        'bank_name'       => 'Primary Bank Name',
+        'bank_account'    => 'Primary Bank A/c Number',
+        'bank_acc_type'   => 'Primary A/c Type',
+        'bank_ifsc'       => 'Primary IFSC Code',
+        'document_type'   => 'Primary Document Type',
+        'document_number' => 'Primary Document Number',
         'tags'            => 'Tags',
+        'groups'          => 'Groups',
         'website'         => 'Website',
         'facebook'        => 'Facebook',
         'twitter'         => 'Twitter',
@@ -48,45 +63,80 @@ class ContactExportController extends Controller
 
     public function exportCsv(Request $request)
     {
-        // Get selected columns from session (set by ManageExport Livewire component)
-        $selectedColumns = session('export_selected_columns', array_keys($this->allColumnLabels));
-
-        // Clear from session after reading
+        // Get selected columns with filters from session
+        $selectedColumnsData = session('export_selected_columns', []);
         session()->forget('export_selected_columns');
 
         $org = session('selected_Orga_UIN');
 
-        // ============================================================
-        // Exact same query + eager loading as the original exportCsv()
-        // ============================================================
-        $contacts = Admn_User_Mast::where('Admn_Orga_Mast_UIN', $org)
-            ->where('Is_Actv', 100201)
-            ->with([
-                // Admn_Tag_Mast — contact tags
-                'tags',
-
-                // Phones ordered by primary first
-                // Admn_Cutr_Mast — country code on each phone
-                'phones' => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
-
-                // Emails ordered by primary first
-                'emails' => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
-
-                // Primary address only, with full location chain:
-                // Admn_Cutr_Mast  → country
-                // Admn_Stat_Mast  → state
-                // Admn_Dist_Mast  → district
-                // Admn_Cnta_Link_Mast (or pincode model) → pincode
-                'addresses' => fn($q) => $q->where('Is_Prmy', true)
-                                           ->with(['country', 'state', 'district', 'pincode']),
-            ])
-            ->get();
+        // Build query with filters
+        $query = Admn_User_Mast::where('Admn_Orga_Mast_UIN', $org)
+            ->where('Is_Actv', 100201);
 
         // ============================================================
-        // Load prefix separately using Admn_Prfx_Name_Mast
-        // (same as original — prefix is on the contact model)
+        // APPLY FILTERS with OR logic - contacts matching ANY filter will be included
         // ============================================================
-        $contacts->load('prefix'); // Admn_Prfx_Name_Mast
+        $filters = $this->extractFilters($selectedColumnsData);
+
+        // Check if any filters are active
+        $hasActiveFilters = !empty($filters['gender']) && $filters['gender'] !== 'all'
+                         || !empty($filters['address_type']) && $filters['address_type'] !== 'all'
+                         || !empty($filters['bank_name'])
+                         || !empty($filters['document_type']);
+
+        if ($hasActiveFilters) {
+            $query->where(function($q) use ($filters) {
+                // Gender filter (OR)
+                if (!empty($filters['gender']) && $filters['gender'] !== 'all') {
+                    $q->orWhere('Gend', $filters['gender']);
+                }
+
+                // Address type filter (OR)
+                if (!empty($filters['address_type']) && $filters['address_type'] !== 'all') {
+                    $q->orWhereHas('addresses', function($addressQuery) use ($filters) {
+                        $addressQuery->where('Admn_Addr_Type_Mast_UIN', $filters['address_type'])
+                                    ->where('Is_Prmy', true);
+                    });
+                }
+
+                // Bank name filter (OR)
+                if (!empty($filters['bank_name'])) {
+                    $q->orWhereHas('bankAccounts', function($bankQuery) use ($filters) {
+                        $bankQuery->where('Bank_Name_UIN', $filters['bank_name'])
+                                 ->where('Prmy', 1);
+                    });
+                }
+
+                // Document type filter (OR)
+                if (!empty($filters['document_type'])) {
+                    $q->orWhereHas('documents', function($docQuery) use ($filters) {
+                        $docQuery->where('Admn_Docu_Type_Mast_UIN', $filters['document_type'])
+                                ->where('Prmy', 1);
+                    });
+                }
+            });
+        }
+
+        // ============================================================
+        // Eager load relationships
+        // ============================================================
+        $contacts = $query->with([
+            'tags',
+            'prefix',
+            'phones' => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
+            'emails' => fn($q) => $q->orderBy('Is_Prmy', 'desc'),
+            'addresses' => fn($q) => $q->where('Is_Prmy', true)
+                                       ->with(['country', 'state', 'district', 'pincode', 'type']),
+            'latestEducation',
+            'skills',
+            'currentEmployment',
+            'bankAccounts' => fn($q) => $q->where('Prmy', 1)->with('bank'),
+            'documents' => fn($q) => $q->where('Prmy', 1)->with('documentType'),
+            'group',
+        ])->get();
+
+        // Extract column keys for CSV headers
+        $selectedColumns = $this->extractColumnKeys($selectedColumnsData);
 
         $filename = 'contacts_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
@@ -103,7 +153,7 @@ class ContactExportController extends Controller
         $callback = function () use ($contacts, $selectedColumns, $allColumnLabels) {
             $file = fopen('php://output', 'w');
 
-            // Write CSV header row — only selected columns
+            // Write CSV header row
             $headerRow = [];
             foreach ($selectedColumns as $key) {
                 if (isset($allColumnLabels[$key])) {
@@ -113,9 +163,8 @@ class ContactExportController extends Controller
             fputcsv($file, $headerRow);
 
             foreach ($contacts as $contact) {
-
                 // ------------------------------------------------
-                // PHONES — same logic as original exportCsv()
+                // PHONES
                 // ------------------------------------------------
                 $phones = $contact->phones;
                 $phone1 = $phones->get(0);
@@ -123,7 +172,7 @@ class ContactExportController extends Controller
                 $phone3 = $phones->get(2);
 
                 // ------------------------------------------------
-                // EMAILS — same logic as original exportCsv()
+                // EMAILS
                 // ------------------------------------------------
                 $emails = $contact->emails;
                 $email1 = $emails->get(0);
@@ -132,88 +181,107 @@ class ContactExportController extends Controller
 
                 // ------------------------------------------------
                 // PRIMARY ADDRESS
-                // Admn_Cutr_Mast  → $primaryAddress->country->Name
-                // Admn_Stat_Mast  → $primaryAddress->state->Name
-                // Admn_Dist_Mast  → $primaryAddress->district->Name
-                // Admn_Cnta_Link_Mast → $primaryAddress->pincode->Code
                 // ------------------------------------------------
-                $primaryAddress    = $contact->addresses->first();
+                $primaryAddress = $contact->addresses->first();
                 $fullAddressString = '';
+                $addressType = '';
                 if ($primaryAddress) {
                     $addressParts = [
                         $primaryAddress->Addr,
                         $primaryAddress->Loca,
                         $primaryAddress->Lndm,
-                        optional($primaryAddress->pincode)->Code,    // Admn_Cnta_Link_Mast
-                        optional($primaryAddress->district)->Name,   // Admn_Dist_Mast
-                        optional($primaryAddress->state)->Name,      // Admn_Stat_Mast
-                        optional($primaryAddress->country)->Name,    // Admn_Cutr_Mast
+                        optional($primaryAddress->pincode)->Code,
+                        optional($primaryAddress->district)->Name,
+                        optional($primaryAddress->state)->Name,
+                        optional($primaryAddress->country)->Name,
                     ];
                     $fullAddressString = implode(', ', array_filter($addressParts));
+                    $addressType = optional($primaryAddress->type)->Name ?? '';
                 }
 
                 // ------------------------------------------------
-                // FULL DATA MAP — mirrors exactly the original
-                // exportCsv() $row array from the main component
+                // EDUCATION (latest by completion year)
+                // ------------------------------------------------
+                $latestEducation = $contact->latestEducation;
+                $degreeName = optional($latestEducation)->Deg_Name ?? '';
+                $degreeYear = optional($latestEducation)->Cmpt_Year ?? '';
+
+                // ------------------------------------------------
+                // SKILLS
+                // ------------------------------------------------
+                $skillNames = $contact->skills->pluck('Skil_Name')->implode(', ');
+
+                // ------------------------------------------------
+                // EMPLOYMENT (current or most recent)
+                // ------------------------------------------------
+                $currentEmployment = $contact->currentEmployment;
+                $employmentOrg = optional($currentEmployment)->Orga_Name ?? '';
+                $employmentDesg = optional($currentEmployment)->Dsgn ?? '';
+
+                // ------------------------------------------------
+                // BANK ACCOUNT
+                // ------------------------------------------------
+                $primaryBank = $contact->bankAccounts->first();
+                $bankName = optional(optional($primaryBank)->bank)->Bank_Name ?? '';
+                $bankAccount = optional($primaryBank)->Acnt_Numb ?? '';
+                $bankAccType = optional($primaryBank)->Acnt_Type ?? '';
+                $bankIfsc = optional($primaryBank)->IFSC_Code ?? '';
+
+                // ------------------------------------------------
+                // DOCUMENT
+                // ------------------------------------------------
+                $primaryDoc = $contact->documents->first();
+                $docType = optional(optional($primaryDoc)->documentType)->Docu_Name ?? '';
+                $docNumber = optional($primaryDoc)->Docu_Numb ?? '';
+
+                // ------------------------------------------------
+                // FULL DATA MAP
                 // ------------------------------------------------
                 $allData = [
-                    // Admn_Prfx_Name_Mast → prefix name
-                    'name_prefix'  => optional($contact->prefix)->Prfx_Name ?? '',
-
-                    'gender'       => $contact->Gend ?? '',
-                    'first_name'   => $contact->FaNm ?? '',
-                    'middle_name'  => $contact->MiNm ?? '',
-                    'last_name'    => $contact->LaNm ?? '',
-
-                    'birthday'     => $contact->Brth_Dt
-                                        ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y')
-                                        : '',
-
-                    // Admn_User_Mast → Prfl_Name (self-employed profile)
-                    'self_employed' => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
-
-                    'company_name' => $contact->Comp_Name ?? '',
-                    'designation'  => $contact->Comp_Dsig ?? '',
-
-                    // Phone 1 — Admn_Cutr_Mast for Cutr_Code
-                    'phone1_label'  => $phone1
-                                        ? $this->normalizePhoneTypeForExport($phone1->Phon_Type)
-                                        : '',
-                    'phone1_code'   => optional($phone1)->Cutr_Code ?? '',
-                    'phone1_number' => optional($phone1)->Phon_Numb ?? '',
-
-                    // Phone 2
-                    'phone2_label'  => $phone2
-                                        ? $this->normalizePhoneTypeForExport($phone2->Phon_Type)
-                                        : '',
-                    'phone2_code'   => optional($phone2)->Cutr_Code ?? '',
-                    'phone2_number' => optional($phone2)->Phon_Numb ?? '',
-
-                    // Phone 3
-                    'phone3_label'  => $phone3
-                                        ? $this->normalizePhoneTypeForExport($phone3->Phon_Type)
-                                        : '',
-                    'phone3_code'   => optional($phone3)->Cutr_Code ?? '',
-                    'phone3_number' => optional($phone3)->Phon_Numb ?? '',
-
-                    // Emails
-                    'email1'        => optional($email1)->Emai_Addr ?? '',
-                    'email2'        => optional($email2)->Emai_Addr ?? '',
-                    'email3'        => optional($email3)->Emai_Addr ?? '',
-
-                    // Full address built from:
-                    // Admn_Cutr_Mast + Admn_Stat_Mast + Admn_Dist_Mast + Admn_Cnta_Link_Mast
+                    'name_prefix'     => optional($contact->prefix)->Prfx_Name ?? '',
+                    'gender'          => $contact->Gend ?? '',
+                    'first_name'      => $contact->FaNm ?? '',
+                    'middle_name'     => $contact->MiNm ?? '',
+                    'last_name'       => $contact->LaNm ?? '',
+                    'birthday'        => $contact->Brth_Dt
+                                            ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y')
+                                            : '',
+                    'self_employed'   => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
+                    'company_name'    => $contact->Comp_Name ?? '',
+                    'designation'     => $contact->Comp_Dsig ?? '',
+                    'phone1_label'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
+                    'phone1_code'     => optional($phone1)->Cutr_Code ?? '',
+                    'phone1_number'   => optional($phone1)->Phon_Numb ?? '',
+                    'phone2_label'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
+                    'phone2_code'     => optional($phone2)->Cutr_Code ?? '',
+                    'phone2_number'   => optional($phone2)->Phon_Numb ?? '',
+                    'phone3_label'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
+                    'phone3_code'     => optional($phone3)->Cutr_Code ?? '',
+                    'phone3_number'   => optional($phone3)->Phon_Numb ?? '',
+                    'email1'          => optional($email1)->Emai_Addr ?? '',
+                    'email2'          => optional($email2)->Emai_Addr ?? '',
+                    'email3'          => optional($email3)->Emai_Addr ?? '',
+                    'address_type'    => $addressType,
                     'primary_address' => $fullAddressString,
-
-                    // Admn_Tag_Mast → tag names
-                    'tags'          => $contact->tags->pluck('Name')->implode(', '),
-
-                    'website'       => $contact->Web  ?? '',
-                    'facebook'      => $contact->FcBk ?? '',
-                    'twitter'       => $contact->Twtr ?? '',
-                    'linkedin'      => $contact->LnDn ?? '',
-                    'instagram'     => $contact->Intg ?? '',
-                    'notes'         => $contact->Note ?? '',
+                    'degree_name'     => $degreeName,
+                    'degree_year'     => $degreeYear,
+                    'skill_name'      => $skillNames,
+                    'employment_org'  => $employmentOrg,
+                    'employment_desg' => $employmentDesg,
+                    'bank_name'       => $bankName,
+                    'bank_account'    => $bankAccount,
+                    'bank_acc_type'   => $bankAccType,
+                    'bank_ifsc'       => $bankIfsc,
+                    'document_type'   => $docType,
+                    'document_number' => $docNumber,
+                    'tags'            => $contact->tags->pluck('Name')->implode(', '),
+                    'groups'          => optional($contact->group)->Name ?? '',
+                    'website'         => $contact->Web  ?? '',
+                    'facebook'        => $contact->FcBk ?? '',
+                    'twitter'         => $contact->Twtr ?? '',
+                    'linkedin'        => $contact->LnDn ?? '',
+                    'instagram'       => $contact->Intg ?? '',
+                    'notes'           => $contact->Note ?? '',
                 ];
 
                 // Build final row with ONLY selected columns in correct order
@@ -231,9 +299,43 @@ class ContactExportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    // ============================================================
-    // Same helper as original exportCsv() in the main component
-    // ============================================================
+    /**
+     * Extract filter values from selected columns data
+     */
+    private function extractFilters(array $selectedColumnsData): array
+    {
+        $filters = [
+            'gender' => null,
+            'address_type' => null,
+            'bank_name' => null,
+            'document_type' => null,
+        ];
+
+        foreach ($selectedColumnsData as $item) {
+            $key = is_array($item) ? ($item['key'] ?? null) : $item;
+            $filterValue = is_array($item) ? ($item['filter_value'] ?? null) : null;
+
+            if (in_array($key, ['gender', 'address_type', 'bank_name', 'document_type'])) {
+                $filters[$key] = $filterValue;
+            }
+        }
+
+        return $filters;
+    }
+
+    /**
+     * Extract column keys from selected columns data
+     */
+    private function extractColumnKeys(array $selectedColumnsData): array
+    {
+        return array_map(function($item) {
+            return is_array($item) ? ($item['key'] ?? $item) : $item;
+        }, $selectedColumnsData);
+    }
+
+    /**
+     * Normalize phone type for export
+     */
     private function normalizePhoneTypeForExport(?string $phoneType): string
     {
         if (empty($phoneType)) {

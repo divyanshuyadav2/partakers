@@ -2,12 +2,10 @@
 
 namespace App\Livewire\Contacts;
 
+use App\Models\Admn_Bank_Name;
+use App\Models\Admn_Docu_Type_Mast;
 use Livewire\Attributes\On;
 use Livewire\Component;
-
-// NOTE: All model imports (Admn_User_Mast, Admn_Tag_Mast, etc.)
-// are used in ContactExportController, NOT here.
-// ManageExport only handles the modal UI + column selection.
 
 class ManageExport extends Component
 {
@@ -15,7 +13,7 @@ class ManageExport extends Component
 
     public array $columns = [
         'name_prefix'     => ['label' => 'Name Prefix',           'checked' => true],
-        'gender'          => ['label' => 'Gender',                'checked' => true],
+        'gender'          => ['label' => 'Gender',                'checked' => true, 'filter_value' => 'all'], // NEW
         'first_name'      => ['label' => 'First Name',            'checked' => true],
         'middle_name'     => ['label' => 'Middle Name',           'checked' => false],
         'last_name'       => ['label' => 'Last Name',             'checked' => true],
@@ -23,6 +21,7 @@ class ManageExport extends Component
         'self_employed'   => ['label' => 'Self Employed',         'checked' => false],
         'company_name'    => ['label' => 'Company Name',          'checked' => true],
         'designation'     => ['label' => 'Designation',           'checked' => true],
+        
         'phone1_label'    => ['label' => 'Phone 1 Label',         'checked' => true],
         'phone1_code'     => ['label' => 'Phone 1 Country Code',  'checked' => false],
         'phone1_number'   => ['label' => 'Phone 1 Number',        'checked' => true],
@@ -32,11 +31,32 @@ class ManageExport extends Component
         'phone3_label'    => ['label' => 'Phone 3 Label',         'checked' => false],
         'phone3_code'     => ['label' => 'Phone 3 Country Code',  'checked' => false],
         'phone3_number'   => ['label' => 'Phone 3 Number',        'checked' => false],
+        
         'email1'          => ['label' => 'Email 1',               'checked' => true],
         'email2'          => ['label' => 'Email 2',               'checked' => false],
         'email3'          => ['label' => 'Email 3',               'checked' => false],
+        
+        'address_type'    => ['label' => 'Address Type',          'checked' => false, 'filter_value' => 'all'], // NEW
         'primary_address' => ['label' => 'Primary Address',       'checked' => true],
+        
+        'degree_name'     => ['label' => 'Degree Name',           'checked' => false],
+        'degree_year'     => ['label' => 'Degree Completion Year','checked' => false],
+        
+        'skill_name'      => ['label' => 'Skill Name',            'checked' => false],
+        
+        'employment_org'  => ['label' => 'Present Employment Org','checked' => false],
+        'employment_desg' => ['label' => 'Present Employment Designation', 'checked' => false],
+        
+        'bank_name'       => ['label' => 'Primary Bank Name',     'checked' => false, 'filter_value' => ''], // NEW
+        'bank_account'    => ['label' => 'Primary Bank A/c Number', 'checked' => false],
+        'bank_acc_type'   => ['label' => 'Primary A/c Type',      'checked' => false],
+        'bank_ifsc'       => ['label' => 'Primary IFSC Code',     'checked' => false],
+        
+        'document_type'   => ['label' => 'Primary Document Type', 'checked' => false, 'filter_value' => ''], // NEW
+        'document_number' => ['label' => 'Primary Document Number', 'checked' => false],
+        
         'tags'            => ['label' => 'Tags',                  'checked' => true],
+        'groups'          => ['label' => 'Groups',                'checked' => false],
         'website'         => ['label' => 'Website',               'checked' => false],
         'facebook'        => ['label' => 'Facebook',              'checked' => false],
         'twitter'         => ['label' => 'Twitter',               'checked' => false],
@@ -45,9 +65,20 @@ class ManageExport extends Component
         'notes'           => ['label' => 'Notes',                 'checked' => false],
     ];
 
-    // ============================================================
-    // OPEN / CLOSE
-    // ============================================================
+    // Dropdown options
+    public array $genderOptions = [];
+    public array $addressTypeOptions = [];
+    public array $bankOptions = [];
+    public array $documentTypeOptions = [];
+
+    public function mount()
+    {
+        // Load dropdown data
+        $this->genderOptions = ['Male', 'Female', 'Other'];
+        $this->addressTypeOptions = ['Home', 'Work', 'Other'];
+        $this->bankOptions = Admn_Bank_Name::pluck('Bank_Name', 'Bank_UIN')->toArray();
+        $this->documentTypeOptions = Admn_Docu_Type_Mast::pluck('Docu_Name', 'Admn_Docu_Type_Mast_UIN')->toArray();
+    }
 
     #[On('openExportModal')]
     public function openModal(): void
@@ -59,10 +90,6 @@ class ManageExport extends Component
     {
         $this->showExportModal = false;
     }
-
-    // ============================================================
-    // SELECT / DESELECT ALL
-    // ============================================================
 
     public function selectAll(): void
     {
@@ -78,31 +105,22 @@ class ManageExport extends Component
         }
     }
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
-
     public function getSelectedCount(): int
     {
         return collect($this->columns)->filter(fn($col) => $col['checked'])->count();
     }
 
-    // ============================================================
-    // EXPORT
-    // Livewire cannot stream files directly (response gets swallowed
-    // by Livewire's JSON AJAX handler).
-    //
-    // Flow:
-    //   1. Save selected columns to session
-    //   2. Redirect to /contacts/export/csv
-    //   3. ContactExportController reads session + streams CSV
-    // ============================================================
-
     public function exportCsv(): void
     {
         $selectedColumns = collect($this->columns)
             ->filter(fn($col) => $col['checked'])
-            ->keys()
+            ->map(function($col, $key) {
+                // Include filter values for filtered columns
+                return [
+                    'key' => $key,
+                    'filter_value' => $col['filter_value'] ?? null
+                ];
+            })
             ->toArray();
 
         if (empty($selectedColumns)) {
@@ -110,16 +128,12 @@ class ManageExport extends Component
             return;
         }
 
-        // Store in session — ContactExportController picks this up
+        // Store complete column config in session
         session(['export_selected_columns' => $selectedColumns]);
+        session()->save();
 
-        // Redirect triggers a real HTTP GET → controller streams the file
-        $this->redirect(route('contacts.export.csv'));
+        $this->redirect(route('contacts.export.csv'), navigate: false);
     }
-
-    // ============================================================
-    // RENDER
-    // ============================================================
 
     public function render()
     {

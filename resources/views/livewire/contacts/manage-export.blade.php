@@ -10,7 +10,7 @@
                  x-transition.opacity.duration.300ms
                  class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
 
-            <!-- Modal Window -->
+            <!-- Modal Window - INCREASED WIDTH -->
             <div x-show="show"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"
@@ -18,7 +18,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
-                 class="relative z-10 flex flex-col w-full max-w-2xl bg-slate-800 rounded-xl shadow-2xl border border-slate-700/60 overflow-hidden"
+                 class="relative z-10 flex flex-col w-full max-w-5xl bg-slate-800 rounded-xl shadow-2xl border border-slate-700/60 overflow-hidden"
                  style="max-height: 85vh;">
 
                 <!-- Header -->
@@ -66,30 +66,129 @@
                     </div>
                 </div>
 
-                <!-- Column Checkboxes -->
+                <!-- Column Checkboxes - ORGANIZED BY SECTIONS -->
                 <div class="flex-1 overflow-y-auto p-6 bg-slate-800/50">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        @foreach ($columns as $key => $col)
-                            <label wire:key="col-{{ $key }}"
-                                class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150
-                                    {{ $col['checked']
-                                        ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/15'
-                                        : 'bg-slate-900/40 border-slate-700/50 hover:bg-slate-700/40' }}">
-
-                                <input type="checkbox"
-                                    wire:model.live="columns.{{ $key }}.checked"
-                                    class="w-4 h-4 rounded text-blue-500 bg-slate-700 border-slate-600 focus:ring-blue-500 focus:ring-offset-slate-800 cursor-pointer">
-
-                                <span class="text-sm font-medium {{ $col['checked'] ? 'text-blue-200' : 'text-slate-300' }}">
-                                    {{ $col['label'] }}
-                                </span>
-
-                                @if($col['checked'])
-                                    <i class="bi bi-check-circle-fill text-blue-400 text-xs ml-auto"></i>
+                    
+                    {{-- Personal Details Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-person-circle"></i>
+                            Personal Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['name_prefix', 'gender', 'first_name', 'middle_name', 'last_name', 'birthday', 'self_employed'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
                                 @endif
-                            </label>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
+
+                    {{-- Company/Employment Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-purple-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-building"></i>
+                            Company & Employment
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['company_name', 'designation', 'employment_org', 'employment_desg'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Contact Information Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-green-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-telephone"></i>
+                            Contact Information
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['phone1_label', 'phone1_code', 'phone1_number', 'phone2_label', 'phone2_code', 'phone2_number', 'phone3_label', 'phone3_code', 'phone3_number', 'email1', 'email2', 'email3'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Address Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-orange-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-geo-alt"></i>
+                            Address
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['address_type', 'primary_address'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Education & Skills Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-cyan-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-mortarboard"></i>
+                            Education & Skills
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['degree_name', 'degree_year', 'skill_name'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Financial Information Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-yellow-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-bank"></i>
+                            Financial Information
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['bank_name', 'bank_account', 'bank_acc_type', 'bank_ifsc'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Documents Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-pink-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-file-earmark-text"></i>
+                            Documents
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['document_type', 'document_number'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Web Presence & Other Section --}}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-indigo-300 mb-3 flex items-center gap-2">
+                            <i class="bi bi-globe"></i>
+                            Web Presence & Other
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['tags', 'groups', 'website', 'facebook', 'twitter', 'linkedin', 'instagram', 'notes'] as $key)
+                                @if(isset($columns[$key]))
+                                    @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Footer -->
