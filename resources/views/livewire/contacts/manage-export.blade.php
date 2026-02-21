@@ -106,7 +106,7 @@
                             Contact Information
                         </h3>
                         <div class="grid grid-cols-2 gap-3">
-                            @foreach (['phone1_label', 'phone1_number', 'phone2_label', 'phone2_number', 'phone3_label', 'phone3_number', 'email1', 'email2', 'email3'] as $key)
+                            @foreach (['phone1_uses_of', 'phone1_number', 'phone2_uses_of', 'phone2_number', 'phone3_uses_of', 'phone3_number', 'email1', 'email2', 'email3'] as $key)
                                 @if(isset($columns[$key]))
                                     @include('livewire.contacts.partials.export-field', ['key' => $key, 'col' => $columns[$key]])
                                 @endif

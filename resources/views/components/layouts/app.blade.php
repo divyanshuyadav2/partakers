@@ -98,7 +98,7 @@
                             <i class="bi bi-arrow-repeat"></i>
                             <span>Change</span>
                         </button>
-                        <a href="https://partakedigital.in/dashboard"
+                        <a href="https://partakers.in/dashboard"
                             class="w-full text-left px-4 py-2 text-gray-200 hover:bg-slate-700 flex items-center space-x-2">
                             <i class="bi bi-arrow-left"></i>
                             <span>Back</span>

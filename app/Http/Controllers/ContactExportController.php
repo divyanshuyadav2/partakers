@@ -27,13 +27,13 @@ class ContactExportController extends Controller
     'company_name'    => 'Company Name',
     'designation'     => 'Designation',
     
-    'phone1_label'    => 'Phone 1 Label',
+    'phone1_uses_of'    => 'Phone 1 Uses of',
     'phone1_number'   => 'Phone 1 Number',
     
-    'phone2_label'    => 'Phone 2 Label',
+    'phone2_uses_of'    => 'Phone 2 Uses of',
     'phone2_number'   => 'Phone 2 Number',
     
-    'phone3_label'    => 'Phone 3 Label',
+    'phone3_uses_of'    => 'Phone 3 Uses of',
     'phone3_number'   => 'Phone 3 Number',
     
     'email1'          => 'Email 1',
@@ -46,12 +46,12 @@ class ContactExportController extends Controller
     'skill_name'      => 'Skill Name',
     'employment_org'  => 'Present Employment Organization',
     'employment_desg' => 'Present Employment Designation',
-    'bank_name'       => 'Primary Bank Name',
-    'bank_account'    => 'Primary Bank A/c Number',
-    'bank_acc_type'   => 'Primary A/c Type',
-    'bank_ifsc'       => 'Primary IFSC Code',
-    'document_type'   => 'Primary Document Type',
-    'document_number' => 'Primary Document Number',
+    'bank_name'       => 'Bank Name',
+    'bank_account'    => 'Bank A/c Number',
+    'bank_acc_type'   => 'A/c Type',
+    'bank_ifsc'       => 'IFSC Code',
+    'document_type'   => 'Document Type',
+    'document_number' => 'Document Number',
     'tags'            => 'Tags',
     'groups'          => 'Groups',
     'website'         => 'Website',
@@ -252,15 +252,15 @@ class ContactExportController extends Controller
                 'designation'     => $contact->Comp_Dsig ?? '',
                 
                 // Phone 1 with WhatsApp/Telegram indicators
-                'phone1_label'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
+                'phone1_uses_of'    => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
                 'phone1_number'   => $this->formatPhoneWithApps($phone1),
                 
                 // Phone 2 with WhatsApp/Telegram indicators
-                'phone2_label'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
+                'phone2_uses_of'    => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
                 'phone2_number'   => $this->formatPhoneWithApps($phone2),
                 
                 // Phone 3 with WhatsApp/Telegram indicators
-                'phone3_label'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
+                'phone3_uses_of'    => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
                 'phone3_number'   => $this->formatPhoneWithApps($phone3),
                 
                 'email1'          => optional($email1)->Emai_Addr ?? '',

@@ -76,7 +76,7 @@
                         </header>
 
                         <!-- Main Content Area -->
-                        <div class="flex flex-col flex-1 overflow-hidden min-h-0">
+                        <div class="flex flex-col overflow-hidden min-h-0" style="flex: 0.3;">
                             <!-- Notes List -->
                             <div class="flex-1 overflow-y-auto">
                                 @if (count($existingNotes) > 0)
@@ -171,7 +171,7 @@
 
                         <!-- Bottom Section -->
                         <div
-                            class="flex-1 flex flex-col p-4 gap-3 overflow-hidden bg-slate-800 border-t border-slate-700">
+                            class="flex flex-col p-4 gap-3 overflow-hidden bg-slate-800 border-t border-slate-700" style="flex: 1.7;">
                             <!-- Note Input -->
                             <div class="relative flex-[0.35] min-h-[120px]">
                                 <textarea id="new-note-content" wire:model.live.debounce="newNoteContent" placeholder="Type your note..."
@@ -180,10 +180,7 @@
 
                                 <!-- Save / Cancel -->
                                 <div class="absolute bottom-2 right-2 flex gap-1.5">
-                                    <button wire:click="closeNoteSidebar"
-                                        class="px-2.5 py-1 bg-slate-700/60 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs rounded transition">
-                                        Cancel
-                                    </button>
+                                   
                                     <button wire:click="saveNote" @if (empty($newNoteContent)) disabled @endif
                                         class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700/50 disabled:text-slate-500 text-white text-xs rounded transition">
                                         Save
@@ -192,7 +189,7 @@
                             </div>
 
                             <!-- Templates -->
-                            <div class="flex-[0.65] flex flex-col min-h-0">
+                            <div class="flex flex-col min-h-0" style="flex: 0.75;">
                                 <p class="text-xs font-semibold text-slate-300 flex items-center gap-1.5 mb-2">
                                     <i class="bi bi-lightning-charge-fill text-yellow-400 text-xs"></i>
                                     Templates

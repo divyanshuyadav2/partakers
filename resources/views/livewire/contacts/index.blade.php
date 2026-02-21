@@ -594,13 +594,7 @@
                             @input="$event.target.value = $event.target.value.trimStart()"
                             class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">Middle Name</label>
-                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.MiNm"
-                            placeholder="Enter middle name..."
-                            @input="$event.target.value = $event.target.value.trimStart()"
-                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
-                    </div>
+                    
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1">Last Name</label>
                         <input type="text" wire:model.live.debounce.300ms="advancedSearch.LaNm"
@@ -608,6 +602,7 @@
                             @input="$event.target.value = $event.target.value.trimStart()"
                             class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
+                  
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1">Mobile Number</label>
                         <input type="tel" wire:model.live.debounce.300ms="advancedSearch.mobile"
@@ -709,13 +704,7 @@
                         @endif
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">Location</label>
-                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.locality"
-                            placeholder="Enter locality..."
-                            @input="$event.target.value = $event.target.value.trimStart()"
-                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
-                    </div>
+                  
 
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1"> Town/City, Locality,
@@ -733,7 +722,20 @@
                             @input="$event.target.value = $event.target.value.trimStart()"
                             class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-
+                     <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Registration / Reference Number</label>
+                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.registration_reference_number"
+                            placeholder="Enter registration / reference number..."
+                            @input="$event.target.value = $event.target.value.trimStart()"
+                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Bank Account Number</label>
+                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.bank_account_number"
+                            placeholder="Enter bank account number..."
+                            @input="$event.target.value = $event.target.value.trimStart()"
+                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
 
 
                     <div class="border-t border-slate-700"></div>
