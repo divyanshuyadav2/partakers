@@ -40,23 +40,25 @@ class Index extends Component
     public $allGroups = [];
 
     public array $advancedSearch = [
-        'FaNm'                        => '',
-        'bank_account_number'         => '',   // formerly MiNm (Middle Name)
-        'LaNm'                        => '',
-        'mobile'                      => '',
-        'email'                       => '',
-        'company'                     => [],
-        'designation'                 => '',
-        'address'                     => '',
-        'registration_reference_number' => '',  // formerly locality (Location)
-        'landmark'                    => '',
-        'country'                     => '',
-        'state'                       => '',
-        'district'                    => '',
-        'pincode'                     => '',
-        'tags'                        => [],
-        'groups'                      => [],
-    ];
+    'FaNm'                          => '',
+    'MiNm'                          => '',   // Middle Name — existing
+    'LaNm'                          => '',
+    'mobile'                        => '',
+    'email'                         => '',
+    'company'                       => [],
+    'designation'                   => '',
+    'address'                       => '',
+    'locality'                      => '',   // Location — existing
+    'landmark'                      => '',
+    'bank_account_number'           => '',   // Bank Account Number — new
+    'registration_reference_number' => '',   // Registration / Reference Number — new
+    'country'                       => '',
+    'state'                         => '',
+    'district'                      => '',
+    'pincode'                       => '',
+    'tags'                          => [],
+    'groups'                        => [],
+];
 
     #[Computed]
     public function allGroups()
@@ -659,6 +661,12 @@ class Index extends Component
         $query->when($this->search, fn($q, $v) => $q->search($v));
 
         $query->when(!empty($this->advancedSearch['FaNm']), fn($q) => $q->where('FaNm', 'like', "%{$this->advancedSearch['FaNm']}%"));
+        // Middle Name — existing
+        $query->when(!empty($this->advancedSearch['MiNm']), fn($q) => $q->where('MiNm', 'like', "%{$this->advancedSearch['MiNm']}%"));
+
+        // Locality — existing
+        $query->when(!empty($this->advancedSearch['locality']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Loca', 'like', "%{$this->advancedSearch['locality']}%")));
+
 
         // Bank Account Number — search via admn_user_bank_mast (Acnt_Numb)
         $query->when(!empty($this->advancedSearch['bank_account_number']), function ($q) {

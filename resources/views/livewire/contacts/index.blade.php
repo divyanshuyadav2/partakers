@@ -594,6 +594,14 @@
                             @input="$event.target.value = $event.target.value.trimStart()"
                             class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
+                    <!-- Middle Name — existing -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Middle Name</label>
+                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.MiNm"
+                            placeholder="Enter middle name..."
+                            @input="$event.target.value = $event.target.value.trimStart()"
+                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
                     
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1">Last Name</label>
@@ -674,7 +682,14 @@
                             @endforeach
                         </select>
                     </div>
-
+                    <!-- Locality — existing -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Locality</label>
+                        <input type="text" wire:model.live.debounce.300ms="advancedSearch.locality"
+                            placeholder="Enter locality..."
+                            @input="$event.target.value = $event.target.value.trimStart()"
+                            class="w-full bg-slate-700 border-slate-600 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
 
                     <!-- NEW/MODIFIED: Pincode input with autocomplete suggestions -->
                     <div x-data="{ open: true }" @click.away="open = false" class="relative">
