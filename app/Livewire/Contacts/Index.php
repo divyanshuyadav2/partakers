@@ -40,22 +40,22 @@ class Index extends Component
     public $allGroups = [];
 
     public array $advancedSearch = [
-        'FaNm' => '',
-        'MiNm' => '',
-        'LaNm' => '',
-        'mobile' => '',
-        'email' => '',
-        'company' => [],
-        'designation' => '',
-        'address' => '',
-        'locality' => '',
-        'landmark' => '',
-        'country' => '',
-        'state' => '',
-        'district' => '',
-        'pincode' => '',
-        'tags' => [],
-        'groups' => [],
+        'FaNm'                        => '',
+        'bank_account_number'         => '',   // formerly MiNm (Middle Name)
+        'LaNm'                        => '',
+        'mobile'                      => '',
+        'email'                       => '',
+        'company'                     => [],
+        'designation'                 => '',
+        'address'                     => '',
+        'registration_reference_number' => '',  // formerly locality (Location)
+        'landmark'                    => '',
+        'country'                     => '',
+        'state'                       => '',
+        'district'                    => '',
+        'pincode'                     => '',
+        'tags'                        => [],
+        'groups'                      => [],
     ];
 
     #[Computed]
@@ -334,7 +334,7 @@ class Index extends Component
             'Name Prefix',
             'Gender',
             'First Name',
-            'Middle Name',
+            'Bank Account Number',
             'Last Name',
             'Company Name',
             'Designation',
@@ -508,19 +508,19 @@ class Index extends Component
             'Name Prefix',
             'Gender',
             'First Name',
-            'Middle Name',
+            'Bank Account Number',
             'Last Name',
             'Birthday (DD/MM/YYYY)',
             'Self Employed',
             'Company Name',
             'Designation',
-            'Phone 1 Label',
+            'Phone 1 Uses of',
             'Phone 1 Country Code',
             'Phone 1 Number',
-            'Phone 2 Label',
+            'Phone 2 Uses of',
             'Phone 2 Country Code',
             'Phone 2 Number',
-            'Phone 3 Label',
+            'Phone 3 Uses of',
             'Phone 3 Country Code',
             'Phone 3 Number',
             'Email 1',
@@ -570,19 +570,19 @@ class Index extends Component
                     'Name Prefix' => optional($contact->prefix)->Prfx_Name ?? '',
                     'Gender' => $contact->Gend ?? '',
                     'First Name' => $contact->FaNm ?? '',
-                    'Middle Name' => $contact->MiNm ?? '',
+                    'Bank Account Number' => $contact->MiNm ?? '',
                     'Last Name' => $contact->LaNm ?? '',
                     'Birthday (DD/MM/YYYY)' => $contact->Brth_Dt ? \Carbon\Carbon::parse($contact->Brth_Dt)->format('d/m/Y') : '',
                     'Self Employed' => $contact->Prfl_Name ? $contact->Prfl_Name : 'No',
                     'Company Name' => $contact->Comp_Name ?? '',
                     'Designation' => $contact->Comp_Dsig ?? '',
-                    'Phone 1 Label' => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
+                    'Phone 1 Uses of' => $phone1 ? $this->normalizePhoneTypeForExport($phone1->Phon_Type) : '',
                     'Phone 1 Country Code' => optional($phone1)->Cutr_Code ?? '',
                     'Phone 1 Number' => optional($phone1)->Phon_Numb ?? '',
-                    'Phone 2 Label' => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
+                    'Phone 2 Uses of' => $phone2 ? $this->normalizePhoneTypeForExport($phone2->Phon_Type) : '',
                     'Phone 2 Country Code' => optional($phone2)->Cutr_Code ?? '',
                     'Phone 2 Number' => optional($phone2)->Phon_Numb ?? '',
-                    'Phone 3 Label' => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
+                    'Phone 3 Uses of' => $phone3 ? $this->normalizePhoneTypeForExport($phone3->Phon_Type) : '',
                     'Phone 3 Country Code' => optional($phone3)->Cutr_Code ?? '',
                     'Phone 3 Number' => optional($phone3)->Phon_Numb ?? '',
                     'Email 1' => optional($email1)->Emai_Addr ?? '',
@@ -659,13 +659,25 @@ class Index extends Component
         $query->when($this->search, fn($q, $v) => $q->search($v));
 
         $query->when(!empty($this->advancedSearch['FaNm']), fn($q) => $q->where('FaNm', 'like', "%{$this->advancedSearch['FaNm']}%"));
-        $query->when(!empty($this->advancedSearch['MiNm']), fn($q) => $q->where('MiNm', 'like', "%{$this->advancedSearch['MiNm']}%"));
+
+        // Bank Account Number — search via admn_user_bank_mast (Acnt_Numb)
+        $query->when(!empty($this->advancedSearch['bank_account_number']), function ($q) {
+            $acnt = $this->advancedSearch['bank_account_number'];
+            $q->whereHas('bankAccounts', fn($subQ) => $subQ->where('Acnt_Numb', 'like', "%{$acnt}%"));
+        });
+
         $query->when(!empty($this->advancedSearch['LaNm']), fn($q) => $q->where('LaNm', 'like', "%{$this->advancedSearch['LaNm']}%"));
         $query->when(!empty($this->advancedSearch['company']), fn($q) => $q->where('Comp_Name', 'like', "%{$this->advancedSearch['company']}%"));
         $query->when(!empty($this->advancedSearch['designation']), fn($q) => $q->where('Comp_Dsig', 'like', "%{$this->advancedSearch['designation']}%"));
         $query->when(!empty($this->advancedSearch['mobile']), fn($q) => $q->whereHas('phones', fn($subQ) => $subQ->where('Phon_Numb', 'like', "%{$this->advancedSearch['mobile']}%")));
         $query->when(!empty($this->advancedSearch['address']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Addr', 'like', "%{$this->advancedSearch['address']}%")));
-        $query->when(!empty($this->advancedSearch['locality']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Loca', 'like', "%{$this->advancedSearch['locality']}%")));
+
+        // Registration / Reference Number — search via admn_docu_mast (Regn_Numb)
+        $query->when(!empty($this->advancedSearch['registration_reference_number']), function ($q) {
+            $regn = $this->advancedSearch['registration_reference_number'];
+            $q->whereHas('documents', fn($subQ) => $subQ->where('Regn_Numb', 'like', "%{$regn}%"));
+        });
+
         $query->when(!empty($this->advancedSearch['landmark']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Lndm', 'like', "%{$this->advancedSearch['landmark']}%")));
         $query->when(!empty($this->advancedSearch['country']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Admn_Cutr_Mast_UIN', $this->advancedSearch['country'])));
         $query->when(!empty($this->advancedSearch['state']), fn($q) => $q->whereHas('addresses', fn($subQ) => $subQ->where('Admn_Stat_Mast_UIN', $this->advancedSearch['state'])));

@@ -23,13 +23,13 @@ class ManageExport extends Component
         'company_name'    => ['label' => 'Company Name',          'checked' => true],
         'designation'     => ['label' => 'Designation',           'checked' => true],
         
-        'phone1_label'    => ['label' => 'Phone 1 Label',         'checked' => true],
+        'phone1_uses_of'    => ['label' => 'Phone 1 Uses of',         'checked' => true],
         'phone1_number'   => ['label' => 'Phone 1 Number',        'checked' => true],
         
-        'phone2_label'    => ['label' => 'Phone 2 Label',         'checked' => false],
+        'phone2_uses_of'    => ['label' => 'Phone 2 Uses of',         'checked' => false],
         'phone2_number'   => ['label' => 'Phone 2 Number',        'checked' => false],
         
-        'phone3_label'    => ['label' => 'Phone 3 Label',         'checked' => false],
+        'phone3_uses_of'    => ['label' => 'Phone 3 Uses of',         'checked' => false],
         'phone3_number'   => ['label' => 'Phone 3 Number',        'checked' => false],
         
         'email1'          => ['label' => 'Email 1',               'checked' => true],
